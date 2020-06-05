@@ -19,6 +19,7 @@ import java.util.Arrays;
  */
 public class SM3Util {
 
+   
     private static final String ENCODING = "UTF-8";
 
     static {
@@ -26,7 +27,11 @@ public class SM3Util {
     }
 
 
-    //密码加密方法
+    /**
+     * 密码加密方法总和
+     * @param pwd 密码
+     * @return 逻辑加密后的返回密码
+     */
     public static String pwdEncrypt(String pwd){
         if (StringUtils.isNotEmpty(pwd)){
             String pwdConvert = pwdEncryptAssembly(pwd);
@@ -36,7 +41,11 @@ public class SM3Util {
         throw new IllegalStateException("密码不能为空!");
     }
 
-    //获取前端传来的密码数字，然后加密拼接
+    /**
+    * 获取前端传来的密码数字，然后加密拼接
+     * @param pwd 密码
+     * @return 加密拼接完的密码
+    */
     public static String pwdEncryptAssembly(String pwd) {
             StringBuffer stringPwd = new StringBuffer();
             for (char key : pwd.toCharArray()) {
@@ -64,25 +73,33 @@ public class SM3Util {
             byte[] resultHash = hash(srcData);
             // 将返回的hash值转换成16进制字符串
             resultHexString = ByteUtils.toHexString(resultHash);
+            return resultHexString.toUpperCase();
         } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
+           log.info("SM3算法加密失败：",e);
+           throw new  IllegalStateException("SM3算法加密异常");
         }
-        return resultHexString.toUpperCase();
+
     }
 
     /**
      * 返回长度=32的byte数组
      *
      * @param srcData
-     * @return
+     * @return 数组
      * @explain 生成对应的hash值
      */
     public static byte[] hash(byte[] srcData) {
-        SM3Digest digest = new SM3Digest();
-        digest.update(srcData, 0, srcData.length);
-        byte[] hash = new byte[digest.getDigestSize()];
-        digest.doFinal(hash, 0);
-        return hash;
+
+        try {
+            SM3Digest digest = new SM3Digest();
+            digest.update(srcData, 0, srcData.length);
+            byte[] hash = new byte[digest.getDigestSize()];
+            digest.doFinal(hash, 0);
+            return hash;
+        }catch (Exception e){
+            log.info("返回byte数组失败：",e);
+            throw new IllegalStateException("返回byte数组异常");
+        }
     }
 
     /**
@@ -94,14 +111,20 @@ public class SM3Util {
      * @explain 指定密钥进行加密
      */
     public static byte[] hmac(byte[] key, byte[] srcData) {
-        KeyParameter keyParameter = new KeyParameter(key);
-        SM3Digest digest = new SM3Digest();
-        HMac mac = new HMac(digest);
-        mac.init(keyParameter);
-        mac.update(srcData, 0, srcData.length);
-        byte[] result = new byte[mac.getMacSize()];
-        mac.doFinal(result, 0);
-        return result;
+
+        try {
+            KeyParameter keyParameter = new KeyParameter(key);
+            SM3Digest digest = new SM3Digest();
+            HMac mac = new HMac(digest);
+            mac.init(keyParameter);
+            mac.update(srcData, 0, srcData.length);
+            byte[] result = new byte[mac.getMacSize()];
+            mac.doFinal(result, 0);
+            return result;
+        }catch (Exception e){
+            log.info("通过秘钥加密失败：",e);
+            throw new IllegalStateException("通过秘钥加密异常");
+        }
     }
 
     /**
@@ -121,10 +144,12 @@ public class SM3Util {
             if (Arrays.equals(newHash, sm3Hash)) {
                 flag = true;
             }
+            return flag;
         } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
+            log.info("判断源数据与加密数据错误：",e);
+            throw new IllegalStateException("判断源数据与加密数据异常");
         }
-        return flag;
+
     }
 
 }
