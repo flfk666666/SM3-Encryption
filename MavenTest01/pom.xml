@@ -21,7 +21,7 @@
 
     <joda-money.version>1.0.1</joda-money.version>
     <apache-httpclient5.version>5.0</apache-httpclient5.version>
-    <bcprov-jdk15on.version>1.62</bcprov-jdk15on.version>
+    <bcprov-jdk15on.version>1.67</bcprov-jdk15on.version>
   </properties>
 
   <dependencies>
